@@ -17,7 +17,7 @@ let gulp = require("gulp"),
     debug = require("gulp-debug"),
     watch = require("gulp-watch"),
     clean = require("gulp-clean"),
-    rsync = require('gulp-rsync');
+    ftp = require('vinyl-ftp');
 
 let $images = ["./src/img/**/*.{jpg,jpeg,png,gif}", "!./src/img/favicons/*.{jpg,jpeg,png,gif}"],
     $pug = ["./src/views/**/*.pug", "!./src/views/blocks/*.pug"],
@@ -147,24 +147,19 @@ gulp.task("watch", function () {
   });
 });
 
-
-
 // dest
 gulp.task("default", gulp.series("clean",
   gulp.parallel("pug", "scripts", "libs", "styles", "images", "favicons", "other"),
   gulp.parallel("watch", "serve")
 ));
 
-//gulp deploy
-gulp.task("deploy", function () {
-    return gulp.src('./dest/**')
-      .pipe(rsync({
-        root: './dest/',
-        hostname: 'remeslo36.beget.tech',
-        destination: '/home/r/remeslo36/remeslo36.ru/public_html/assets/components/project/dest',
-        username: 'remeslo36',
-        archive: true,
-        silent: false,
-        compress: true
-    }));
+gulp.task('transfer', function () {
+  return gulp.src(['./dest/**/*'], {buffer:false} )
+    .pipe(ftp.create({
+      host: '',
+      user: '',
+      password: '',
+      parallel: 10
+    })
+    .dest('/home/r/remeslo36/remeslo36.ru/public_html/assets/components/project/dest'));
 });
